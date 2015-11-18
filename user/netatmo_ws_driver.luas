@@ -1,0 +1,157 @@
+require 'ltn12'
+json = require("json")
+local https = require 'ssl.https'
+
+function normalize(min,max,reverse,data)
+  if (data > max) then data = max end
+  if (data < min) then data = min end 
+  data = (data-min)*(100/(max-min))    
+  if (reverse) then 
+    data = data-100
+    data = math.ceil(data)
+    if (data > 0) then data = 0 end
+ 		if (data < -100) then data = -100 end 
+    data = math.abs(data)
+  else
+    data = math.ceil(data)
+    if (data > 100) then data = 100 end 
+  	if (data < 0) then data = 0 end 
+  end
+  return data
+end
+
+function netatmo(client_id,client_secret,username,password,netatmo_debug)
+
+  local request_token_url = "https://api.netatmo.net/oauth2/token"
+  local request_device_list = "https://api.netatmo.net/api/getstationsdata"
+  local response_body = { }
+  local data_remastered = { }
+  local netatmo_error
+
+  if (netatmo_debug == nil) then
+    netatmo_debug = true
+  end
+  
+  if (netatmo_debug) then
+    log("netatmo start")
+  end
+ 
+  local request_body = "grant_type=password&client_id=" .. client_id .."&client_secret=" .. client_secret .. "&username=" .. username .. "&password=" .. password
+  local body, code, hdrs, stat = https.request
+  {
+    url = request_token_url;
+    method = "POST";
+    headers =
+    {
+      ["Content-Type"] = "application/x-www-form-urlencoded";
+      ["Content-Length"] = #request_body;
+    };
+    source = ltn12.source.string(request_body);
+    sink = ltn12.sink.table(response_body);
+    protocol = "tlsv1";
+  }
+ 
+  if (code ~= 200) then
+    netatmo_error= "netatmo auth error code: "..code..", set netatmo_debug to true for detaled output in log"
+    if (netatmo_debug) then
+      log(netatmo_error)
+      log(body, code, hdrs, stat)
+    end
+    return
+  end
+  
+  local response_decode = json.decode(table.concat(response_body))
+  local access_token = response_decode.access_token
+  if (netatmo_debug) then
+    log("netatmo token: "..access_token)
+  end  
+  
+  local request_body = "access_token=" .. access_token .. "&app_type=app_station"
+  local response_body = { }
+  local body, code, hdrs, stat = https.request
+  {
+    url = request_device_list;
+    method = "POST";
+    headers =
+    {
+      ["Content-Type"] = "application/x-www-form-urlencoded";
+      ["Content-Length"] = #request_body;
+    };
+    source = ltn12.source.string(request_body);
+    sink = ltn12.sink.table(response_body);
+    protocol = "tlsv1";
+  }
+ 
+  if (code ~= 200) then
+    netatmo_error= "netatmo get data error code: "..code..", set netatmo_debug to true for detaled output in log"
+    if (netatmo_debug) then
+      log(netatmo_error)
+      log(body, code, hdrs, stat)
+    end
+    return
+  end
+  
+  local response_decode = json.decode(table.concat(response_body))
+    
+ 	data_remastered.indoor  = response_decode.body.devices[1].dashboard_data 
+  data_remastered.indoor.wifi_status = normalize(90,56,true,response_decode.body.devices[1].wifi_status) 
+	data_remastered.indoor.module_name = response_decode.body.devices[1].module_name 
+  
+  for i = 1, #response_decode.body.devices[1].modules, 1 do
+    local m_type = response_decode.body.devices[1].modules[i].type
+    if (m_type  == "NAModule1") then
+      data_remastered.outdoor_1 = response_decode.body.devices[1].modules[i].dashboard_data
+      data_remastered.outdoor_1.rf_status = normalize(90,50,true,response_decode.body.devices[1].modules[i].rf_status)
+      data_remastered.outdoor_1.battery_vp = normalize(4000,6100,false,response_decode.body.devices[1].modules[i].battery_vp)
+			data_remastered.outdoor_1.module_name = response_decode.body.devices[1].modules[i].module_name
+    elseif (m_type  == "NAModule4") then
+      data_remastered.outdoor_2 = response_decode.body.devices[1].modules[i].dashboard_data
+      data_remastered.outdoor_2.rf_status = normalize(90,50,true,response_decode.body.devices[1].modules[i].rf_status)
+      data_remastered.outdoor_2.battery_vp = normalize(4000,6100,false,response_decode.body.devices[1].modules[i].battery_vp)
+			data_remastered.outdoor_2.module_name = response_decode.body.devices[1].modules[i].module_name
+    elseif (m_type  == "NAModule2") then
+      data_remastered.wind = response_decode.body.devices[1].modules[i].dashboard_data
+      data_remastered.wind.rf_status = normalize(90,50,true,response_decode.body.devices[1].modules[i].rf_status)
+      data_remastered.wind.battery_vp = normalize(4300,6100,false,response_decode.body.devices[1].modules[i].battery_vp)
+			data_remastered.wind.module_name = response_decode.body.devices[1].modules[i].module_name
+    elseif (m_type  == "NAModule3") then
+      data_remastered.rain = response_decode.body.devices[1].modules[i].dashboard_data
+      data_remastered.rain.rf_status = normalize(90,50,true,response_decode.body.devices[1].modules[i].rf_status)
+      data_remastered.rain.battery_vp = normalize(4000,6100,false,response_decode.body.devices[1].modules[i].battery_vp)
+      data_remastered.rain.module_name = response_decode.body.devices[1].modules[i].module_name
+    end
+	end
+	
+  data_remastered.information = {}
+  data_remastered.information.unit_system = response_decode.body.user.administrative.unit
+  data_remastered.information.wind_unit = response_decode.body.user.administrative.windunit
+  data_remastered.information.pressure_unit = response_decode.body.user.administrative.pressureunit
+  
+  if (data_remastered.information.unit_system == 0) then
+    data_remastered.information.unit_system = "metric"
+  elseif (data_remastered.information.unit_system == 1) then
+    data_remastered.information.unit_system = "imperial"
+  end
+ 
+  if (data_remastered.information.wind_unit == 0) then
+    data_remastered.information.wind_unit = "kph"
+  elseif (data_remastered.information.wind_unit == 1) then
+    data_remastered.information.wind_unit = "mph"
+  elseif (data_remastered.information.wind_unit == 2) then
+    data_remastered.information.wind_unit = "ms"
+  elseif (data_remastered.information.wind_unit == 3) then
+    data_remastered.information.wind_unit = "beaufort"
+  elseif (data_remastered.information.wind_unit == 4) then
+    data_remastered.information.wind_unit = "knot"
+  end
+  
+  if (data_remastered.information.pressure_unit == 0) then
+    data_remastered.information.pressure_unit = "mbar"
+  elseif (data_remastered.information.pressure_unit == 1) then
+    data_remastered.information.pressure_unit = "inHg"
+  elseif (data_remastered.information.pressure_unit == 2) then
+    data_remastered.information.pressure_unit = "mmHg"
+  end
+   
+  return netatmo_error, data_remastered
+end

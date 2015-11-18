@@ -3,13 +3,14 @@
 
 ###Подготовка:
 Покупаем станцию Netatmo(http://madrobots.ru/p/netatmo/)
+
 Регистрируем аккаунт и подключаем станцию к домашней сети согласно прилагаемой инструкции. 
+
 Входим в раздел разработчика(http://dev.netatmo.com) и создаем новое приложение(https://dev.netatmo.com/dev/createapp). Поля заполняем произвольно. 
 Заходим в созданное приложение и копируем содержимое полей Client id и Client secret. 
 
 ###Установка:
-Скачиваем архив https://github.com/vvzvlad/NetatmoLDDriver/raw/master/NetatmoLDDriver.tar.gz
-Кнопкой "Restore/add libraries" в Scripts -> User libraries устанавливаем архив. 
+Скачиваем архив https://github.com/vvzvlad/NetatmoLDDriver/raw/master/NetatmoLDDriver.tar.gz и кнопкой "Restore/add libraries" в Scripts -> User libraries устанавливаем архив. 
 
 Сохраняем скрипт. 
 Создаем новый Scheduled скрипт, настраивая его ну нужную вам частоту запуска(например, раз в 5 минут: */5 * * * *), и вызываем в нем драйвер следующим образом:
@@ -20,7 +21,7 @@
 
 `netatmo_error, netatmo_data = netatmo('56462a08e6da23d4784b4584','zySY5owFsvxmjE85K9MumZEWDBKT63YPPvH8rqTjpT','madrobots@madrobots.ru','secretpassword', false)`
 
-Где client_id и client_secret — данные со страницы приложения, username и password — логин и пароль аккаунта, к которому привязана станция. 
+**client_id** и client_secret — данные со страницы приложения, username и password — логин и пароль аккаунта, к которому привязана станция. 
 netatmo_debug — переменная, определяющая вывод отладочных сообщений в Logs, принимающая значения true или false. 
 
 В ответ функция netatmo возвращает данные: netatmo_error, netatmo_data

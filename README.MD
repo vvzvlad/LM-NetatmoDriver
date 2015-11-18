@@ -1,20 +1,20 @@
-Задача:
+#Задача:
 Подключение погодной станции Netatmo в качестве источника информации о температуре, влажности, давлении и качестве воздуха. 
 
-Подготовка:
+#Подготовка:
 Покупаем станцию Netatmo(http://madrobots.ru/p/netatmo/)
 Регистрируем аккаунт и подключаем станцию к домашней сети согласно прилагаемой инструкции. 
 Входим в раздел разработчика(http://dev.netatmo.com) и создаем новое приложение(https://dev.netatmo.com/dev/createapp). Поля заполняем произвольно. 
 Заходим в созданное приложение и копируем содержимое полей Client id и Client secret. 
 
-Установка:
+# Установка:
 Скачиваем архив https://github.com/vvzvlad/NetatmoLDDriver/raw/master/NetatmoLDDriver.tar.gz
 Кнопкой "Restore/add libraries" в Scripts -> User libraries устанавливаем архив. 
 
 Сохраняем скрипт. 
 Создаем новый Scheduled скрипт, настраивая его ну нужную вам частоту запуска(например, раз в 5 минут: */5 * * * *), и вызываем в нем драйвер следующим образом:
 ------начало кода------
-netatmo_error, netatmo_data = netatmo(client_id,client_secret,username,password,netatmo_debug)
+        netatmo_error, netatmo_data = netatmo(client_id,client_secret,username,password,netatmo_debug)
 ------конец кода------
 
 Пример вызова:

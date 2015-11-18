@@ -25,7 +25,8 @@
 `netatmo_error, netatmo_data = netatmo('56462a08e6da23d4784b4584','zySY5owFsvxmjE85K9MumZEWDBKT63YPPvH8rqTjpT','madrobots@madrobots.ru','secretpassword', false)`
 
 В ответ функция netatmo возвращает данные: **netatmo_error**, **netatmo_data**
-**netatmo_error** — статут запроса. При нормальной работе скрипта nil, при ошибках принимает текстовое значение вида "**netatmo auth error code: 301, set netatmo_debug to true for detaled output in log**"
+
+**netatmo_error** — статут запроса. При нормальной работе скрипта он **nil**, при ошибках принимает текстовое значение вида "**netatmo auth error code: 301, set netatmo_debug to true for detaled output in log**"
 Коды соотвествуют кодам ошибок http, возвращенных в ответ на запрос. 
 
 **netatmo_data** — данные с внешних и внутреннего блоков системы. Структура их такова:
@@ -92,7 +93,7 @@
 
 **Внимание!**
 
-Обратите внимание, что данные(температура, давление, скорость ветра) могут приходить в других единицах измерения в зависимости от настроек станции. Узнать, какие единицы измерения используются можно в netatmo_data.information. 
+Обратите внимание, что данные(температура, давление, скорость ветра) могут быть в других единицах измерения в зависимости от настроек станции. Узнать, какие единицы измерения используются можно в netatmo_data.information. 
 Все указанные суффиксы и типы данных рассчитаны на следующие единицы измерения:
 
 **netatmo_data.information.unit_system** - metric
@@ -102,6 +103,19 @@
 **netatmo_data.information.pressure_unit** - mbar
 
 Проверяйте единицы измерения перед выводом их в userspace с фиксированным суффиксом или используйте динамический вывод суффикса, комбинируемого из двух объектов. 
+
+
+Итоговый скрипт получения данных со станции выглядит примерно так:
+```
+local netatmo_error, netatmo_data = netatmo('56462a08e6da23d9348b2284','zySY7owFsvxmjE84K9MxnOumZEWDBKT54YPPvH8rqTjpT','madrobots@madrobots.ru','secretpassword', false)
+
+if (netatmo_error ~= nil) then
+  log(netatmo_error)
+else
+  grp.write("TMP_Netatmo_indoor",netatmo_data.indoor.Temperature,dt.float16)
+  grp.write("HUM_Netatmo_indoor",netatmo_data.indoor.Humidity,dt.scale)
+end
+```
 
 
  

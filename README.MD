@@ -10,7 +10,7 @@
 Заходим в созданное приложение и копируем содержимое полей **Client id** и **Client secret**. 
 
 ###Установка:
-Скачиваем архив https://github.com/vvzvlad/NetatmoLDDriver/raw/master/NetatmoLDDriver.tar.gz и кнопкой **Restore/add libraries** в **Scripts** -> **User libraries** устанавливаем архив. 
+Скачиваем архив https://github.com/vvzvlad/NetatmoLDDriver/raw/master/LM-NetatmoDriver.tar.gz и кнопкой **Restore/add libraries** в **Scripts** -> **User libraries** устанавливаем архив. 
 
 Сохраняем скрипт. 
 Создаем новый **Scheduled** скрипт, настраивая его ну нужную вам частоту запуска(например, раз в 5 минут: */5 * * * *), и вызываем в нем драйвер следующим образом:

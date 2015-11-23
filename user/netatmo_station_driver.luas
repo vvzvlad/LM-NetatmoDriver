@@ -10,12 +10,12 @@ function normalize(max,min,reverse,data)
     data = data-100
     data = math.ceil(data)
     if (data > 0) then data = 0 end
-    if (data < -100) then data = -100 end 
+ 		if (data < -100) then data = -100 end 
     data = math.abs(data)
   else
     data = math.ceil(data)
     if (data > 100) then data = 100 end 
-    if (data < 0) then data = 0 end 
+  	if (data < 0) then data = 0 end 
   end
   return data
 end
@@ -92,11 +92,10 @@ function netatmo(client_id,client_secret,username,password,netatmo_debug)
   end
   
   local response_decode = json.decode(table.concat(response_body))
-  log(response_decode.body.devices[1].wifi_status)
     
-  data_remastered.indoor  = response_decode.body.devices[1].dashboard_data 
+ 	data_remastered.indoor  = response_decode.body.devices[1].dashboard_data 
   data_remastered.indoor.wifi_status = normalize(88,56,true,response_decode.body.devices[1].wifi_status) 
-  data_remastered.indoor.module_name = response_decode.body.devices[1].module_name 
+	data_remastered.indoor.module_name = response_decode.body.devices[1].module_name 
   
   for i = 1, #response_decode.body.devices[1].modules, 1 do
     local m_type = response_decode.body.devices[1].modules[i].type
@@ -104,25 +103,25 @@ function netatmo(client_id,client_secret,username,password,netatmo_debug)
       data_remastered.outdoor_1 = response_decode.body.devices[1].modules[i].dashboard_data
       data_remastered.outdoor_1.rf_status = normalize(90,50,true,response_decode.body.devices[1].modules[i].rf_status)
       data_remastered.outdoor_1.battery_vp = normalize(6100,4000,false,response_decode.body.devices[1].modules[i].battery_vp)
-      data_remastered.outdoor_1.module_name = response_decode.body.devices[1].modules[i].module_name
+			data_remastered.outdoor_1.module_name = response_decode.body.devices[1].modules[i].module_name
     elseif (m_type  == "NAModule4") then
       data_remastered.outdoor_2 = response_decode.body.devices[1].modules[i].dashboard_data
       data_remastered.outdoor_2.rf_status = normalize(90,50,true,response_decode.body.devices[1].modules[i].rf_status)
       data_remastered.outdoor_2.battery_vp = normalize(6100,4000,false,response_decode.body.devices[1].modules[i].battery_vp)
-      data_remastered.outdoor_2.module_name = response_decode.body.devices[1].modules[i].module_name
+			data_remastered.outdoor_2.module_name = response_decode.body.devices[1].modules[i].module_name
     elseif (m_type  == "NAModule2") then
       data_remastered.wind = response_decode.body.devices[1].modules[i].dashboard_data
       data_remastered.wind.rf_status = normalize(90,50,true,response_decode.body.devices[1].modules[i].rf_status)
       data_remastered.wind.battery_vp = normalize(6100,4000,false,response_decode.body.devices[1].modules[i].battery_vp)
-      data_remastered.wind.module_name = response_decode.body.devices[1].modules[i].module_name
+			data_remastered.wind.module_name = response_decode.body.devices[1].modules[i].module_name
     elseif (m_type  == "NAModule3") then
       data_remastered.rain = response_decode.body.devices[1].modules[i].dashboard_data
       data_remastered.rain.rf_status = normalize(90,50,true,response_decode.body.devices[1].modules[i].rf_status)
       data_remastered.rain.battery_vp = normalize(6100,4000,false,response_decode.body.devices[1].modules[i].battery_vp)
       data_remastered.rain.module_name = response_decode.body.devices[1].modules[i].module_name
     end
-  end
-  
+	end
+	
   data_remastered.information = {}
   data_remastered.information.unit_system = response_decode.body.user.administrative.unit
   data_remastered.information.wind_unit = response_decode.body.user.administrative.windunit
@@ -156,3 +155,4 @@ function netatmo(client_id,client_secret,username,password,netatmo_debug)
   end
    
   return netatmo_error, data_remastered
+end

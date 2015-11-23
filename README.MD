@@ -13,6 +13,8 @@
 Скачиваем архив https://github.com/vvzvlad/NetatmoLDDriver/raw/master/LM-NetatmoDriver.tar.gz и кнопкой **Restore/add libraries** в **Scripts** -> **User libraries** устанавливаем архив. 
 
 Сохраняем скрипт. 
+
+###Использование
 Создаем новый **Scheduled** скрипт, настраивая его ну нужную вам частоту запуска(например, раз в 5 минут: */5 * * * *), и вызываем в нем драйвер следующим образом:
 
 `netatmo_error, netatmo_data = netatmo(client_id,client_secret,username,password,netatmo_debug)`
@@ -116,7 +118,7 @@ else
   grp.write("HUM_Netatmo_indoor",netatmo_data.indoor.Humidity,dt.scale)
 end
 ```
-
+###Помощь и поддержка
 По всем вопросам по функционалу, ошибках, исправлениям, доработкам можно обращаться по почте vvzvlad@gmail.com
 
  
